@@ -682,8 +682,7 @@ em{ font-style:normal; color:var(--accent-text); }
           <div class="phone">
             <div class="screen">
               <video-slot id="video-celular" radius="38" fit="contain" autoplay
-                src="Assets/Flujo_Facebook_Final.mp4"
-                placeholder="Arrastra tu video vertical (recorrido del prospecto)"></video-slot>
+                src="Assets/Flujo_Facebook_Final.mp4"></video-slot>
             </div>
           </div>
         </div>
@@ -727,8 +726,7 @@ em{ font-style:normal; color:var(--accent-text); }
           <div class="lid">
             <div class="lscreen">
               <video-slot id="video-laptop" fit="contain" autoplay
-                src="Assets/Flujo_Dashboard_Final.mp4"
-                placeholder="Arrastra tu video horizontal (recorrido del dashboard)"></video-slot>
+                src="Assets/Flujo_Dashboard_Final.mp4"></video-slot>
             </div>
           </div>
           <div class="base"></div>
@@ -812,7 +810,7 @@ em{ font-style:normal; color:var(--accent-text); }
         </div>
       </div>
       <div class="card anim anim-4" style="margin-top:auto;padding:28px 34px;border-left:5px solid var(--accent);display:flex;align-items:center;gap:24px;">
-        <span class="tag-mono" style="white-space:nowrap;">El ask</span>
+        <span class="tag-mono" style="white-space:nowrap;">La pregunta</span>
         <span style="font-size:25px;font-weight:500;">Continuar el piloto con Insight-r y un <span class="accent">dueño que lo adopte</span> en la operación diaria.</span>
       </div>
     </div>
@@ -2673,200 +2671,50 @@ em{ font-style:normal; color:var(--accent-text); }
 </script>
 <script>
 /**
- * <video-slot> — user-fillable video placeholder.
+ * <video-slot> — read-only embedded video player.
  *
- * Drag a video file onto it (or click to browse) and it plays immediately.
- * The chosen clip is stored as a Blob in IndexedDB keyed by `id`, so it
- * survives reloads on the SAME browser — ideal for a live demo where the
- * presenter drops their clip once and it stays put. (It does not travel to
- * share links / PPTX export — for that, set the `src` attribute to a real
- * file path in the project instead; a dropped clip overrides `src`.)
+ * Always plays the video given in `src` (a project file path). No upload,
+ * drag-and-drop, replace or remove controls — the source is fixed at author
+ * time so it can't be accidentally changed or cleared during a live demo.
  *
  * Attributes:
- *   id           Persistence key (required to survive reload).
- *   src          Optional fallback video URL / project path.
- *   poster       Optional poster image shown before play.
- *   fit          object-fit: cover | contain   (default 'cover')
- *   radius       Corner radius px               (default 0)
- *   placeholder  Empty-state caption
- *   autoplay     If present, muted-autoplay+loop once a source is set.
+ *   src       Video URL / project path.
+ *   poster    Optional poster image shown before play.
+ *   fit       object-fit: cover | contain   (default 'cover')
+ *   radius    Corner radius px               (default 0)
+ *   autoplay  If present, muted-autoplay+loop once a source is set.
  *
  * Size/layout come from ordinary CSS (width/height) on the element.
  */
 (() => {
-  const DB = 'leadflow-videos', STORE = 'clips';
-  const ACCEPT = ['video/mp4', 'video/webm', 'video/quicktime', 'video/ogg'];
-
-  function idb() {
-    return new Promise((res, rej) => {
-      const r = indexedDB.open(DB, 1);
-      r.onupgradeneeded = () => r.result.createObjectStore(STORE);
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => rej(r.error);
-    });
-  }
-  async function idbGet(key) {
-    const db = await idb();
-    return new Promise((res) => {
-      const tx = db.transaction(STORE, 'readonly').objectStore(STORE).get(key);
-      tx.onsuccess = () => res(tx.result || null);
-      tx.onerror = () => res(null);
-    });
-  }
-  async function idbSet(key, val) {
-    const db = await idb();
-    return new Promise((res) => {
-      const tx = db.transaction(STORE, 'readwrite');
-      tx.objectStore(STORE).put(val, key);
-      tx.oncomplete = () => res();
-      tx.onerror = () => res();
-    });
-  }
-  async function idbDel(key) {
-    const db = await idb();
-    return new Promise((res) => {
-      const tx = db.transaction(STORE, 'readwrite');
-      tx.objectStore(STORE).delete(key);
-      tx.oncomplete = () => res();
-      tx.onerror = () => res();
-    });
-  }
-
   const CSS =
-    ':host{display:block;position:relative;background:#06070d;overflow:hidden;' +
-    '  font:13px/1.4 system-ui,-apple-system,sans-serif;color:rgba(255,255,255,.7)}' +
-    'video{position:absolute;inset:0;width:100%;height:100%;display:none;background:#000}' +
-    '.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;' +
-    '  justify-content:center;gap:10px;text-align:center;padding:18px;box-sizing:border-box;' +
-    '  cursor:pointer;user-select:none}' +
-    '.empty svg{opacity:.5}' +
-    '.empty .cap{font-weight:600;letter-spacing:.01em;max-width:90%;color:rgba(255,255,255,.82)}' +
-    '.empty .sub{font-size:11.5px;color:rgba(255,255,255,.45)}' +
-    '.empty .sub u{text-underline-offset:2px}' +
-    '.ring{position:absolute;inset:0;pointer-events:none;border:1.5px dashed rgba(255,255,255,.22);' +
-    '  border-radius:inherit;transition:border-color .12s}' +
-    ':host([data-over]) .ring{border-color:var(--vs-accent,#2A6FF6)}' +
-    ':host([data-over]){outline:2px solid var(--vs-accent,#2A6FF6);outline-offset:-2px}' +
-    ':host([data-filled]) .ring{display:none}' +
-    '.ctl{position:absolute;right:10px;bottom:10px;display:flex;gap:6px;opacity:0;' +
-    '  transition:opacity .15s;z-index:3}' +
-    ':host(:hover) .ctl{opacity:1}' +
-    '.ctl button{appearance:none;border:0;border-radius:7px;padding:6px 11px;cursor:pointer;' +
-    '  background:rgba(8,10,18,.78);color:#fff;font:11.5px/1 system-ui,sans-serif;' +
-    '  backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12)}' +
-    '.ctl button:hover{background:rgba(8,10,18,.95)}';
-
-  const ICON =
-    '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-    'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
-    '<rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 5 3-5 3z" fill="currentColor"/></svg>';
+    ':host{display:block;position:relative;background:#06070d;overflow:hidden}' +
+    'video{position:absolute;inset:0;width:100%;height:100%;display:block;background:#000}';
 
   class VideoSlot extends HTMLElement {
-    static get observedAttributes() { return ['src','poster','fit','radius','placeholder']; }
+    static get observedAttributes() { return ['src','poster','fit','radius']; }
     constructor() {
       super();
       const root = this.attachShadow({ mode: 'open' });
-      root.innerHTML =
-        '<style>' + CSS + '</style>' +
-        '<video playsinline></video>' +
-        '<div class="empty">' + ICON +
-        '  <div class="cap"></div><div class="sub">o <u>buscar archivo</u></div></div>' +
-        '<div class="ring"></div>' +
-        '<div class="ctl"><button data-act="replace">Reemplazar</button>' +
-        '  <button data-act="clear">Quitar</button></div>' +
-        '<input type="file" accept="' + ACCEPT.join(',') + '" hidden>';
+      root.innerHTML = '<style>' + CSS + '</style><video playsinline></video>';
       this._video = root.querySelector('video');
-      this._empty = root.querySelector('.empty');
-      this._cap = root.querySelector('.cap');
-      this._input = root.querySelector('input');
-      this._url = null;
-      this._depth = 0;
-      this._empty.addEventListener('click', () => this._input.click());
-      root.addEventListener('click', (e) => {
-        const act = e.target?.getAttribute?.('data-act');
-        if (act === 'replace') this._input.click();
-        if (act === 'clear') this._clear();
-      });
-      this._input.addEventListener('change', () => {
-        const f = this._input.files?.[0];
-        if (f) this._ingest(f);
-        this._input.value = '';
-      });
     }
-    connectedCallback() {
-      ['dragenter','dragover','dragleave','drop'].forEach((t) => this.addEventListener(t, this));
-      this._render();
-      this._hydrate();
-    }
-    disconnectedCallback() {
-      ['dragenter','dragover','dragleave','drop'].forEach((t) => this.removeEventListener(t, this));
-      if (this._url) { URL.revokeObjectURL(this._url); this._url = null; }
-    }
+    connectedCallback() { this._render(); }
     attributeChangedCallback() { if (this.shadowRoot) this._render(); }
-
-    async _hydrate() {
-      if (!this.id) return;
-      const blob = await idbGet(this.id);
-      if (blob) this._setBlob(blob, false);
-    }
-    handleEvent(e) {
-      if (e.type === 'dragenter' || e.type === 'dragover') {
-        e.preventDefault(); e.stopPropagation();
-        if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
-        if (e.type === 'dragenter') this._depth++;
-        this.setAttribute('data-over', '');
-      } else if (e.type === 'dragleave') {
-        if (--this._depth <= 0) { this._depth = 0; this.removeAttribute('data-over'); }
-      } else if (e.type === 'drop') {
-        e.preventDefault(); e.stopPropagation();
-        this._depth = 0; this.removeAttribute('data-over');
-        const f = e.dataTransfer?.files?.[0];
-        if (f) this._ingest(f);
-      }
-    }
-    async _ingest(file) {
-      if (!file || !file.type.startsWith('video/')) return;
-      if (this.id) { try { await idbSet(this.id, file); } catch {} }
-      this._setBlob(file, true);
-    }
-    _setBlob(blob, _isNew) {
-      if (this._url) URL.revokeObjectURL(this._url);
-      this._url = URL.createObjectURL(blob);
-      this._applySource(this._url);
-    }
-    _applySource(url) {
-      this._video.src = url;
-      this._video.style.display = 'block';
-      this._video.style.objectFit = this.getAttribute('fit') || 'cover';
-      this._video.controls = true;
-      this._video.loop = true;
-      if (this.hasAttribute('autoplay')) {
-        this._video.muted = true;
-        this._video.play().catch(() => {});
-      }
-      this._empty.style.display = 'none';
-      this.setAttribute('data-filled', '');
-    }
-    async _clear() {
-      if (this.id) { try { await idbDel(this.id); } catch {} }
-      if (this._url) { URL.revokeObjectURL(this._url); this._url = null; }
-      this._video.removeAttribute('src');
-      this._video.load();
-      this._video.style.display = 'none';
-      this._empty.style.display = 'flex';
-      this.removeAttribute('data-filled');
-      // fall back to author src if any
-      const src = this.getAttribute('src');
-      if (src) this._applySource(src);
-    }
     _render() {
       this.style.borderRadius = (parseFloat(this.getAttribute('radius')) || 0) + 'px';
-      this._cap.textContent = this.getAttribute('placeholder') || 'Arrastra tu video aquí';
       const poster = this.getAttribute('poster');
       if (poster) this._video.poster = poster;
-      // author src as initial source (overridden by an IDB-stored drop)
+      this._video.style.objectFit = this.getAttribute('fit') || 'cover';
       const src = this.getAttribute('src');
-      if (src && !this.hasAttribute('data-filled') && !this._url) this._applySource(src);
+      if (src && this._video.getAttribute('src') !== src) {
+        this._video.src = src;
+        this._video.loop = true;
+        if (this.hasAttribute('autoplay')) {
+          this._video.muted = true;
+          this._video.play().catch(() => {});
+        }
+      }
     }
   }
   if (!customElements.get('video-slot')) customElements.define('video-slot', VideoSlot);
