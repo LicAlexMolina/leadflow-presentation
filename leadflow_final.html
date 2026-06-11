@@ -258,6 +258,7 @@ em{ font-style:normal; color:var(--accent-text); }
 .lcard .lp{ font-size:16.5px; color:var(--muted); line-height:1.42; }
 .verdict{ display:inline-flex; align-items:center; gap:9px; padding:8px 15px; border-radius:999px; font-family:var(--font-mono); font-size:13.5px; letter-spacing:.06em; text-transform:uppercase; }
 .verdict.persevere{ background:rgba(25,195,125,.14); color:var(--ok); }
+.verdict.pending{ background:rgba(245,166,35,.14); color:var(--warn); }
 .verdict .d{ width:8px; height:8px; border-radius:50%; background:currentColor; }
 
 /* insight list */
@@ -678,13 +679,14 @@ em{ font-style:normal; color:var(--accent-text); }
             <div class="chip" style="font-size:21px;justify-content:flex-start;"><span class="ic"></span> El chatbot responde y califica</div>
           </div>
         </div>
-        <div class="anim anim-5" style="display:flex;justify-content:center;">
+        <div class="anim anim-5" style="display:flex;flex-direction:column;align-items:center;gap:16px;">
           <div class="phone">
             <div class="screen">
               <video-slot id="video-celular" radius="38" fit="contain" autoplay
                 src="Assets/Flujo_Facebook_Final.mp4"></video-slot>
             </div>
           </div>
+          <a href="https://drive.google.com/drive/folders/1Z7HQvI0mxF5UltRDRPAVBmFV-Ma--HFr?usp=sharing" target="_blank" rel="noopener" style="font-size:14px;color:var(--muted);text-decoration:underline;">¿El video no carga? Verlo en Google Drive ↗</a>
         </div>
       </div>
     </div>
@@ -721,7 +723,7 @@ em{ font-style:normal; color:var(--accent-text); }
         <div class="eyebrow">Respaldo visual</div>
         <span class="tag-mono">El dashboard en video · por si la demo en vivo falla</span>
       </div>
-      <div class="anim anim-2" style="margin-top:auto;display:flex;justify-content:center;width:100%;">
+      <div class="anim anim-2" style="margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;">
         <div class="laptop">
           <div class="lid">
             <div class="lscreen">
@@ -731,6 +733,7 @@ em{ font-style:normal; color:var(--accent-text); }
           </div>
           <div class="base"></div>
         </div>
+        <a href="https://drive.google.com/drive/folders/1Z7HQvI0mxF5UltRDRPAVBmFV-Ma--HFr?usp=sharing" target="_blank" rel="noopener" style="font-size:14px;color:var(--muted);text-decoration:underline;">¿El video no carga? Verlo en Google Drive ↗</a>
       </div>
       <div class="anim anim-3" style="margin-top:auto;display:flex;align-items:center;justify-content:center;gap:26px;flex-wrap:wrap;">
         <a class="cta-btn" href="https://crm-tribu.lovable.app" target="_blank" rel="noopener">Ir a la plataforma
@@ -771,7 +774,7 @@ em{ font-style:normal; color:var(--accent-text); }
             <div class="fbar"><div class="track grow" style="width:18.2%;"><span class="fv">4</span></div><span class="fl">Citas agendadas · 18.2%</span></div>
             <div class="fbar"><div class="track grow" style="width:4.5%;"><span class="fv">1</span></div><span class="fl">Demos realizadas · 4.5%</span></div>
             <div class="fbar"><div class="track grow" style="width:4.5%;"><span class="fv">1</span></div><span class="fl">Propuestas enviadas · 4.5%</span></div>
-            <div class="fbar"><div class="track grow" style="width:0%;"><span class="fv">0</span></div><span class="fl">Cerrados ganados · 0.0%</span></div>
+            <div class="fbar"><div class="track grow" style="width:0%;"><span class="fv">0</span></div><span class="fl">Cerrados ganados · 0.0%</span><span class="verdict pending"><span class="d"></span> Ciclo en curso · ~1 mes</span></div>
           </div>
         </div>
       </div>

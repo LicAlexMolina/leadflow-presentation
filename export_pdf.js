@@ -79,6 +79,12 @@ function findChrome() {
     // page.pdf() — leadflow_final.html on disk is never touched.
     await page.evaluate(() => {
       const DRIVE_URL = 'https://drive.google.com/drive/folders/1Z7HQvI0mxF5UltRDRPAVBmFV-Ma--HFr?usp=sharing';
+      // The deck already shows a small "video didn't load? see Drive" link
+      // under each video for the live page — redundant once the card below
+      // takes over the whole slot for print, so hide it.
+      document.querySelectorAll('a[href*="drive.google.com"]').forEach((a) => {
+        a.style.display = 'none';
+      });
       document.querySelectorAll('video-slot').forEach((slot) => {
         const root = slot.shadowRoot;
         const video = root && root.querySelector('video');
