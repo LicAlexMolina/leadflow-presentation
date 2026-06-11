@@ -44,15 +44,28 @@ function findChrome() {
   const browser = await puppeteer.launch({
     executablePath: findChrome(),
     headless: 'new',
-    args: ['--no-sandbox', '--allow-file-access-from-files'],
+    args: ['--no-sandbox', '--allow-file-access-from-files', '--disable-gpu', '--disable-dev-shm-usage'],
   });
 
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: 1920, height: 1080 });
 
-    // 'load' (not 'networkidle0') — the deck's autoplaying/looping videos
-    // keep the network busy indefinitely, so networkidle0 would time out.
+    // The PDF no longer shows any video frames (replaced by a Drive link
+    // card below), so don't even download/decode the two huge demo videos
+    // (70-95MB each, autoplaying + looping) — that decoding is what was
+    // pegging the CPU/RAM during export. Block them at the network layer.
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+      if (req.resourceType() === 'media' || /\.mp4(\?|$)/i.test(req.url())) {
+        req.abort();
+      } else {
+        req.continue();
+      }
+    });
+
+    // 'load' (not 'networkidle0') — fine now that the videos are blocked,
+    // but 'load' is still the safer/faster choice here.
     await page.goto(url, { waitUntil: 'load', timeout: 60000 });
     await page.evaluateHandle('document.fonts.ready');
 
