@@ -59,33 +59,26 @@ function findChrome() {
     // Let entrance animations / custom elements settle before printing.
     await new Promise((r) => setTimeout(r, 1500));
 
-    // Chrome's print pipeline rasterizes <video> elements at their native
-    // decoded resolution as lossless (FlateDecode) PDF images, which can
-    // each weigh 1-1.5MB. Swap each <video> for a downscaled JPEG snapshot
-    // of its current frame before printing to drastically shrink the PDF.
+    // Embedded videos make the PDF very heavy and can't play in a static
+    // document anyway. For the PDF only, replace each <video-slot>'s video
+    // with a card linking to the Google Drive folder that hosts the demo
+    // videos. This is a transient change to the in-memory page used for
+    // page.pdf() — leadflow_final.html on disk is never touched.
     await page.evaluate(() => {
-      const MAX_DIM = 800;
-      const QUALITY = 0.75;
+      const DRIVE_URL = 'https://drive.google.com/drive/folders/1Z7HQvI0mxF5UltRDRPAVBmFV-Ma--HFr?usp=sharing';
       document.querySelectorAll('video-slot').forEach((slot) => {
         const root = slot.shadowRoot;
         const video = root && root.querySelector('video');
-        if (!video || !video.videoWidth || !video.videoHeight) return;
-        const scale = Math.min(1, MAX_DIM / Math.max(video.videoWidth, video.videoHeight));
-        const w = Math.round(video.videoWidth * scale);
-        const h = Math.round(video.videoHeight * scale);
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL('image/jpeg', QUALITY);
-        const img = document.createElement('img');
-        img.src = dataUrl;
-        img.style.cssText =
-          'position:absolute;inset:0;width:100%;height:100%;object-fit:' +
-          (video.style.objectFit || 'cover') + ';';
-        video.style.display = 'none';
-        root.appendChild(img);
+        if (video) video.style.display = 'none';
+        const card = document.createElement('div');
+        card.style.cssText =
+          'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;' +
+          'justify-content:center;gap:14px;text-align:center;padding:32px;box-sizing:border-box;' +
+          'background:#10141F;color:#F4F6FC;font-family:system-ui,-apple-system,sans-serif;';
+        card.innerHTML =
+          '<div style="font-size:24px;font-weight:700;">Ver video en Google Drive</div>' +
+          '<a href="' + DRIVE_URL + '" style="color:#5FDC76;font-size:15px;word-break:break-all;text-decoration:underline;">' + DRIVE_URL + '</a>';
+        root.appendChild(card);
       });
     });
 
