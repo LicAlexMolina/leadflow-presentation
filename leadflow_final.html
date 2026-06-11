@@ -238,7 +238,7 @@ em{ font-style:normal; color:var(--accent-text); }
 /* funnel */
 .funnel{ display:flex; flex-direction:column; gap:11px; }
 .fbar{ display:flex; align-items:center; gap:20px; }
-.fbar .track{ height:62px; min-width:8px; border-radius:12px; background:linear-gradient(90deg,var(--accent),color-mix(in oklab,var(--accent),#9ad 60%)); display:flex; align-items:center; padding-left:24px; transform-origin:left center; }
+.fbar .track{ height:62px; min-width:70px; border-radius:12px; background:linear-gradient(90deg,var(--accent),color-mix(in oklab,var(--accent),#9ad 60%)); display:flex; align-items:center; justify-content:flex-start; padding:0 16px 0 24px; transform-origin:left center; }
 .fbar .track .fv{ font-family:var(--font-display); font-weight:600; font-size:30px; color:#fff; }
 .fbar .fl{ font-size:20px; color:var(--muted); white-space:nowrap; }
 
@@ -759,6 +759,7 @@ em{ font-style:normal; color:var(--accent-text); }
           <div class="metric">
             <div class="num">18<span class="unit">%</span></div>
             <div class="label">conversión inicial <strong style="color:var(--ink)">a cita</strong> sobre el total de leads.</div>
+            <div class="tag-mono" style="margin-top:10px;">Mejor histórico previo: <span style="color:var(--accent-text)">9%</span> de citas agendadas</div>
           </div>
         </div>
         <div class="card" style="padding:32px;">
@@ -770,7 +771,7 @@ em{ font-style:normal; color:var(--accent-text); }
             <div class="fbar"><div class="track grow" style="width:18.2%;"><span class="fv">4</span></div><span class="fl">Citas agendadas · 18.2%</span></div>
             <div class="fbar"><div class="track grow" style="width:4.5%;"><span class="fv">1</span></div><span class="fl">Demos realizadas · 4.5%</span></div>
             <div class="fbar"><div class="track grow" style="width:4.5%;"><span class="fv">1</span></div><span class="fl">Propuestas enviadas · 4.5%</span></div>
-            <div class="fbar"><div class="track grow" style="width:0%;min-width:26px;padding-left:6px;"><span class="fv">0</span></div><span class="fl">Cerrados ganados · 0.0%</span></div>
+            <div class="fbar"><div class="track grow" style="width:0%;"><span class="fv">0</span></div><span class="fl">Cerrados ganados · 0.0%</span></div>
           </div>
         </div>
       </div>
