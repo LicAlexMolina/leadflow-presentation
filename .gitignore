@@ -1,5 +1,2 @@
-# Video assets too large for GitHub (>50MB)
-Assets/*.mp4
-
 # Node dependencies (regenerate with: npm install)
 node_modules/
