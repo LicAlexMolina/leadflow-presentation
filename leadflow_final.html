@@ -2673,9 +2673,10 @@ em{ font-style:normal; color:var(--accent-text); }
 /**
  * <video-slot> — read-only embedded video player.
  *
- * Always plays the video given in `src` (a project file path). No upload,
- * drag-and-drop, replace or remove controls — the source is fixed at author
- * time so it can't be accidentally changed or cleared during a live demo.
+ * Always plays the video given in `src` (a project file path). Has native
+ * play/pause/volume controls, but no upload, drag-and-drop, replace or
+ * remove controls — the source is fixed at author time so it can't be
+ * accidentally changed or cleared during a live demo.
  *
  * Attributes:
  *   src       Video URL / project path.
@@ -2696,7 +2697,7 @@ em{ font-style:normal; color:var(--accent-text); }
     constructor() {
       super();
       const root = this.attachShadow({ mode: 'open' });
-      root.innerHTML = '<style>' + CSS + '</style><video playsinline></video>';
+      root.innerHTML = '<style>' + CSS + '</style><video playsinline controls controlsList="nodownload noremoteplayback"></video>';
       this._video = root.querySelector('video');
     }
     connectedCallback() { this._render(); }
